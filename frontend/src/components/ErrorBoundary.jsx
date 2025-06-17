@@ -17,8 +17,8 @@ class ErrorBoundary extends Component {
   render() {
     if (this.state.hasError) {
       return(
-        <div>
-          <h1>Something went wrong please try again later.</h1>
+        <div className='min-h-screen flex items-center justify-center bg-red-50 text-red-700'>
+          <h1>Something went wrong. Please try again later.</h1>
         </div>
       )
     }
