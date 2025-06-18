@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import { fetchTasks } from '../services/api'
 import TaskCard from '../components/TaskCard';
+import { Link } from 'react-router-dom'
 
 const TaskList = () => {
   const [tasks, setTasks] = useState([]);
@@ -8,8 +9,7 @@ const TaskList = () => {
   const [error, setError] = useState(null)
 
   useEffect(() => {
-    axios
-    .get("http://127.0.0.1:8000/api/tasks/")
+    fetchTasks()
     .then((res) => {
       setTasks(res.data)
       setLoading(false)
@@ -25,7 +25,13 @@ const TaskList = () => {
   if (tasks.length === 0) return <p className='text-center mt-10'>No tasks yet.</p>
 
   return(
-    <div className='p-6 max-w-2xl mx-auto space-y-r4'>
+    <div className='p-6 max-w-2xl mx-auto space-y-4'>
+      <Link
+       to='/add'
+       className='border inline-block bg-green-600 text-white px-4 py-2 rounded mb-4 hover:bg-green-700 transition duration-300 ease-in-out'
+      >
+        + Add Task
+      </Link>
       {tasks.map((task) => (
         <TaskCard key={task.id} task={task} />
       ))}
