@@ -4,15 +4,16 @@ export const validateTaskInput = ({ title, description }) => {
     description: ''
   }
 
+  const trimmedTitle = title.trim();
   let hasError = false
 
-  if (!title.trim()) {
+  if (!trimmedTitle) {
     errors.title = 'Title is required.'
     hasError = true
-  } else if (title.length < 5) {
+  } else if (trimmedTitle.length < 5) {
     errors.title = 'Title must be at least 5 characters long.'
     hasError = true
-  } else if (title.length > 100) {
+  } else if (trimmedTitle.length > 100) {
     errors.title = 'Title is too long (max 100 characters).'
     hasError = true
   }

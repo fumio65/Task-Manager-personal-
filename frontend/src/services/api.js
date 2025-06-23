@@ -1,9 +1,13 @@
 import axios from 'axios';
 
-const API_BASE = 'http://127.0.0.1:8000/api';
+const BASE_URL = 'http://127.0.0.1:8000/api/tasks/';
 
-export const fetchTasks = () =>
-  axios.get(`${API_BASE}/tasks/`)
+export const getAllTasks = async () => {
+  const res = await axios.get(BASE_URL);
+  return res.data
+}
 
-export const createTask = (taskData) =>
-  axios.post(`${API_BASE}/tasks/`, taskData )
+export const createTask = async (taskData) => {
+  const res = await axios.post(BASE_URL, taskData);
+  return res.data;
+};
