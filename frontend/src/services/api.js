@@ -1,13 +1,18 @@
 import axios from 'axios';
 
-const BASE_URL = 'http://127.0.0.1:8000/api/tasks/';
+const API_URL = 'http://127.0.0.1:8000/api/tasks/';
 
 export const getAllTasks = async () => {
-  const res = await axios.get(BASE_URL);
-  return res.data
+  const res = await axios.get(API_URL);
+  return res.data;
+};
+
+export const updateTask = async (id, updates) => {
+  const res = await axios.patch(`${API_URL}${id}/`, updates);
+  return res.data;
 }
 
 export const createTask = async (taskData) => {
-  const res = await axios.post(BASE_URL, taskData);
+  const res = await axios.post(API_URL, taskData);
   return res.data;
-};
+}

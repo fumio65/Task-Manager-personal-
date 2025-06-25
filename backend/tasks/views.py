@@ -1,7 +1,11 @@
-from rest_framework import viewsets
+from rest_framework import generics
 from .models import Task
 from .serializers import TaskSerializer
 
-class TaskViewSet(viewsets.ModelViewSet):
+class TaskListCreateAPIView(generics.ListCreateAPIView):
   queryset = Task.objects.all().order_by('-created_at')
+  serializer_class = TaskSerializer
+
+class TaskDetailAPIview(generics.RetrieveUpdateDestroyAPIView):
+  queryset = Task.objects.all()
   serializer_class = TaskSerializer
