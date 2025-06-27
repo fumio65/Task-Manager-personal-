@@ -3,6 +3,7 @@ import Home from "./pages/Home";
 import ErrorBoundary from "./components/ErrorBoundary";
 import TaskList from './pages/TaskList';
 import AddTasks from './pages/AddTasks';
+import EditTask from "./pages/EditTask";
 
 function App() {
   return (
@@ -12,6 +13,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path='/tasks' element={<TaskList />} />
           <Route path='/add' element={<AddTasks />} />
+          <Route path='/edit/:id' element={<EditTask />} />
         </Routes>
       </ErrorBoundary>
     </Router>

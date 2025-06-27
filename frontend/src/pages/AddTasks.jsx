@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createTask } from '../services/api';
-import { validateTaskInput } from '../utils/Validation'
+import { validateTaskInput } from '../utils/validation';
 
 const AddTasks = () => {
   const [title, setTitle] = useState('');
@@ -33,21 +33,21 @@ const AddTasks = () => {
       navigate('/tasks')
     } catch (error) {
       const response = error?.response?.data;
-      const hasError = false
+      const handled = false
 
       if (response?.title?.length > 0) {
         setFieldError(prev => ({ ...prev, title: response.title }))
-        hasError = true
+        handled = true
       }
 
       if (response?.description?.length > 0) {
         setFieldError(prev => ({ ...prev, description: response.description}))
-        hasError = true
+        handled = true
       }
 
       if (errors.message === "Network Error" || !errors.response) {
         setFormError("Server is unreachable. please try again later.")
-      } else if (!hasError) {
+      } else if (!handled) {
         setFormError("Failed to add tasks")
       }
     } finally {

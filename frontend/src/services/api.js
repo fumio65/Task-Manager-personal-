@@ -16,3 +16,8 @@ export const createTask = async (taskData) => {
   const res = await axios.post(API_URL, taskData);
   return res.data;
 }
+ 
+export const getTaskById = async (id) => {
+  const res = await axios.get(`${API_URL}${id}/`);
+  return res.data;
+}
