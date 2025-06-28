@@ -48,7 +48,7 @@ const EditTask = () => {
       navigate('/tasks')
     } catch (error) {
       const response = error?.response?.data;
-      const handled = false;
+      let handled = false;
 
       if (response?.title?.length > 0) {
         setFieldErrors(prev => ({ ...prev, title: response.title }));

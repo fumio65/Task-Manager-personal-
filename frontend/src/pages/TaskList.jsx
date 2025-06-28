@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getAllTasks, updateTask } from '../services/api';
+import { getAllTasks, updateTask, deleteTask } from '../services/api';
 import { Link } from 'react-router-dom';
 
 const TaskList = () => {
@@ -51,6 +51,20 @@ const TaskList = () => {
     }
   };
 
+  const handleDelete = async (taskId) => {
+    const confirm = window.confirm('Are you sure do you want to delete this task?');
+
+    if (!confirm) return;
+
+    try {
+      await deleteTask(taskId);
+      setTasks(prevTasks => prevTasks.filter(task => task.id !== taskId))
+    } catch (error) {
+      console.error('Delete failed', error)
+      alert('Failed to delete the task. Please try again')
+    }
+  }
+
   if (loading) return <p className="text-center mt-10">Loading tasks...</p>;
   if (error) return <p className="text-red-600 text-center mt-10">{error}</p>;
   if (tasks.length === 0) return <p className="text-center mt-10">No tasks found.</p>;
@@ -84,6 +98,12 @@ const TaskList = () => {
                     ? 'Completed'
                     : 'Pending'}
                 </span>
+                <button
+                 onClick={() => handleDelete(task.id)}
+                 className='text-red-600 text-xs hover:underline ml-2 transition duration-300 ease-in-out'
+                >
+                  Delete
+                </button>
               </div>
             </Link>
           </li>
