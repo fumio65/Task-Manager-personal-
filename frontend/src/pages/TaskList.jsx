@@ -1,14 +1,19 @@
 import { useEffect, useState } from 'react';
 import { getAllTasks, updateTask, deleteTask } from '../services/api';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 
 const TaskList = () => {
   const [tasks, setTasks] = useState([]);
+  const [statusMap, setStatusMap] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [statusMap, setStatusMap] = useState({});
+  const [search, setSearch] = useState('');
+  const [filter, setFilter] = useState('all');
 
-  useEffect(() => {
+  const navigate = useNavigate();
+
+  useEffect(() => { 
     const fetchTasks = async () => {
       try {
         const data = await getAllTasks();
@@ -29,57 +34,105 @@ const TaskList = () => {
 
   const handleToggle = async (taskId, currentStatus) => {
     setStatusMap(prev => ({ ...prev, [taskId]: 'loading' }));
-  
-    // Optimistic update using functional update
-    setTasks(prevTasks => 
-      prevTasks.map(task =>
+
+    setTasks(prev => 
+      prev.map(task =>
         task.id === taskId ? { ...task, completed: !currentStatus } : task
       )
     );
+
     try {
       await updateTask(taskId, { completed: !currentStatus });
       setStatusMap(prev => ({ ...prev, [taskId]: 'success' }));
-    } catch (err) {
-      // Rollback using functional update
-      setTasks(prevTasks => 
-        prevTasks.map(task =>
+    } catch (error) {
+      setTasks(prev =>
+        prev.map(task =>
           task.id === taskId ? { ...task, completed: currentStatus } : task
         )
-      );
+      )
       setStatusMap(prev => ({ ...prev, [taskId]: 'error' }));
-      console.error('Toggle failed', err);
+
+      console.error('Toggle failed', error);
     }
-  };
+  }
 
   const handleDelete = async (taskId) => {
-    const confirm = window.confirm('Are you sure do you want to delete this task?');
-
+    const confirm = window.confirm('Are you sure you want to delete this task?');
     if (!confirm) return;
 
     try {
       await deleteTask(taskId);
-      setTasks(prevTasks => prevTasks.filter(task => task.id !== taskId))
-    } catch (error) {
-      console.error('Delete failed', error)
-      alert('Failed to delete the task. Please try again')
+      setTasks(prev => prev.filter(task => task.id !== taskId));
+      toast.success('Task deleted successfully!');
+    } catch (err) {
+      console.error('Delete failed', err);
+      toast.error('Failed to delete task.');
     }
-  }
+  };
+
+  const filteredTasks = tasks.filter(task => {
+    const matchSearch = task.title.toLowerCase().includes(search.toLowerCase())
+    const matchStatus = 
+      filter === 'all' ||
+      (filter === 'completed' && task.completed) ||
+      (filter === 'pending' && !task.completed)
+    return matchSearch && matchStatus;
+  });
 
   if (loading) return <p className="text-center mt-10">Loading tasks...</p>;
   if (error) return <p className="text-red-600 text-center mt-10">{error}</p>;
-  if (tasks.length === 0) return <p className="text-center mt-10">No tasks found.</p>;
 
   return (
     <div className="max-w-3xl mx-auto mt-10 bg-white p-6 rounded-lg shadow">
       <h1 className="text-2xl font-bold mb-6">All Tasks</h1>
-      <ul className="space-y-4">
-        {tasks.map(task => (
-          <li key={task.id} >
-            <Link to={`/edit/${task.id}`} className="border p-4 rounded flex justify-between items-center">
-              <div>
+
+      {/* Search & Filter */}
+      <div className="mb-4 flex flex-col sm:flex-row sm:items-center gap-2">
+        <input
+          type="text"
+          placeholder="Search tasks..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="border p-2 rounded w-full sm:w-auto flex-1"
+        />
+
+        <div className="flex gap-2">
+          {['all', 'completed', 'pending'].map(option => (
+            <button
+              key={option}
+              onClick={() => setFilter(option)}
+              className={`px-4 py-1 rounded border ${
+                filter === option
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-white text-gray-700'
+              }`}
+            >
+              {option.charAt(0).toUpperCase() + option.slice(1)}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Task List */}
+      { filteredTasks === 0 ? (
+        <p className="text-center text-gray-500 italic">No matching tasks.</p>
+      ) : (
+        <ul className="space-y-4">
+          {filteredTasks.map(task => (
+            <li
+              key={task.id}
+              className="border p-4 rounded flex justify-between items-center hover:bg-gray-50 transition"
+            >
+              <div
+                className="cursor-pointer"
+                onClick={() => navigate(`/edit/${task.id}`)}
+              >
                 <h2 className="font-semibold">{task.title}</h2>
-                {task.description && <p className="text-sm text-gray-600">{task.description}</p>}
+                {task.description && (
+                  <p className="text-sm text-gray-600">{task.description}</p>
+                )}
               </div>
+
               <div className="flex items-center gap-2">
                 <input
                   type="checkbox"
@@ -88,8 +141,10 @@ const TaskList = () => {
                   className="w-4 h-4"
                 />
                 <span
-                  className={`text-xs px-2 py-1 rounded ${
-                    task.completed ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                  className={`text-xs px-2 py-1 rounded transition ${
+                    task.completed
+                      ? 'bg-green-100 text-green-800'
+                      : 'bg-yellow-100 text-yellow-800'
                   }`}
                 >
                   {statusMap[task.id] === 'loading'
@@ -99,16 +154,17 @@ const TaskList = () => {
                     : 'Pending'}
                 </span>
                 <button
-                 onClick={() => handleDelete(task.id)}
-                 className='text-red-600 text-xs hover:underline ml-2 transition duration-300 ease-in-out'
+                  onClick={() => handleDelete(task.id)}
+                  className="text-red-600 text-sm hover:underline ml-2"
                 >
                   Delete
                 </button>
               </div>
-            </Link>
-          </li>
-        ))}
-      </ul>
+            </li>
+          ))}
+        </ul>
+      )}
+      
 
       <Link to="/add" className="block mt-6 text-blue-600 hover:underline">
         + Add another task

@@ -51,7 +51,9 @@ const TaskForm = ({ initialData = {}, onSubmit, submitting }) => {
       <button
         type="submit"
         disabled={submitting}
-        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition duration-300 ease-in-out"
+        className={`bg-blue-600 text-white px-4 py-2 rounded transition duration-300 ease-in-out 
+          hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 
+          ${submitting ? 'opacity-50 cursor-not-allowed' : ''}`}
       >
         {submitting ? 'Saving...' : 'Save Task'}
       </button>

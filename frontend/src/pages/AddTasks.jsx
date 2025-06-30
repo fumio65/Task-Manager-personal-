@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createTask } from '../services/api';
 import TaskForm from '../components/TaskForm';
+import toast from 'react-hot-toast';
 
 const AddTasks = () => {
   const [submitting, setSubmitting] = useState(false);
@@ -11,31 +12,33 @@ const AddTasks = () => {
     setSubmitting(true);
     try {
       await createTask(data);
-      navigate('/tasks')
-    } catch (error) {
-      const response = error?.response?.data;
+      toast.success('Task created successfully!');
+      navigate('/tasks');
+    } catch (err) {
+      const response = err?.response?.data;
       let handled = false;
 
       if (response?.title?.length > 0) {
-        setFieldErrors(response.title[0]);
+        setFieldErrors(prev => ({ ...prev, title: response.title[0] }));
         handled = true;
       }
 
       if (response?.description?.length > 0) {
-        setFieldErrors(response.description[0]);
+        setFieldErrors(prev => ({ ...prev, description: response.description[0] }));
         handled = true;
       }
 
-      if (error.message === 'Network Error' || !error.response) {
-        setFormError("Server is unreachable, please try again later.");
-        return;
+      if (err.message === 'Network Error' || !err.response) {
+        setFormError('Server is unreachable. Please try again later.');
       } else if (!handled) {
-        setFormError('Failed to add task.')
+        setFormError('Failed to add task.');
       }
+
+      toast.error('Failed to create task.');
     } finally {
-      setSubmitting(false)
+      setSubmitting(false);
     }
-  }
+  };
 
   return (
     <div className='max-w-xl mx-auto mt-10 bg-white p-6 rounded-lg shadow'>
